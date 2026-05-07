@@ -7,7 +7,7 @@
     "preview": "vite preview generator"
   },
   "dependencies": {
-    "@tlberglund/handwriting-playback": "latest"
+    "@tlberglund/handwriting-playback": "^0.3.1"
   },
   "devDependencies": {
     "vite": "^6.0.0"
