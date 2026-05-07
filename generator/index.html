@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Handwriting Animator — Demo</title>
+   <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+   <h1>Handwriting Animator</h1>
+
+   <!-- Canvas output -->
+   <div id="canvas-container">
+      <canvas id="output-canvas"></canvas>
+   </div>
+
+   <!-- Controls -->
+   <div id="controls">
+      <div class="row">
+         <input type="text" id="text-input" placeholder="Type something to animate…" value="Hello world">
+         <button id="btn-animate">Animate</button>
+         <button id="btn-clear">Clear</button>
+      </div>
+
+      <div class="control-group">
+         <div class="control-item">
+            <label>Speed</label>
+            <div class="value-row">
+               <input type="range" id="speed-slider" min="0.5" max="3" step="0.1" value="1.5">
+               <span class="val-display" id="speed-val">1.5×</span>
+            </div>
+         </div>
+
+         <div class="control-item">
+            <label>Cap Height (px)</label>
+            <div class="value-row">
+               <input type="range" id="cap-height-slider" min="40" max="160" step="4" value="80">
+               <span class="val-display" id="cap-height-val">80px</span>
+            </div>
+         </div>
+
+         <div class="control-item">
+            <label>Render Scale</label>
+            <div class="value-row scale-btns">
+               <button class="scale-btn" data-scale="1">1×</button>
+               <button class="scale-btn active" data-scale="2">2×</button>
+               <button class="scale-btn" data-scale="3">3×</button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

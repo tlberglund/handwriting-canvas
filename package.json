@@ -1,0 +1,15 @@
+{
+  "name": "handwritten-title-generator",
+  "private": true,
+  "scripts": {
+    "dev": "vite generator",
+    "build": "vite build generator",
+    "preview": "vite preview generator"
+  },
+  "dependencies": {
+    "@tlberglund/handwriting-playback": "latest"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}
