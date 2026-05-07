@@ -24,12 +24,12 @@ capHtSlider.addEventListener('input', () => {
    capHtVal.textContent = capHtSlider.value + 'px';
 });
 
-document.querySelectorAll('.scale-btn').forEach(btn => {
-   btn.addEventListener('click', () => {
-      document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderScale = parseInt(btn.dataset.scale);
-   });
+const pixelDensitySlider = document.getElementById('pixel-density-slider');
+const pixelDensityVal    = document.getElementById('pixel-density-val');
+
+pixelDensitySlider.addEventListener('input', () => {
+   renderScale = parseInt(pixelDensitySlider.value);
+   pixelDensityVal.textContent = pixelDensitySlider.value;
 });
 
 btnAnimate.addEventListener('click', async () => {

@@ -127,24 +127,4 @@ input[type=range] {
    text-align: right;
 }
 
-.scale-btns {
-   display: flex;
-   gap: 6px;
-}
-
-.scale-btn {
-   padding: 5px 14px;
-   border: 2px solid #ddd;
-   border-radius: 6px;
-   background: white;
-   cursor: pointer;
-   font-size: 14px;
-   color: #555;
-   transition: all 0.15s;
-}
-.scale-btn.active {
-   border-color: #4a90d9;
-   background: #4a90d9;
-   color: white;
-}
 
