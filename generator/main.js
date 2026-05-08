@@ -62,17 +62,18 @@ function measureText(text, capHeight) {
    return { width: Math.max(0, xOffset - LETTER_GAP) * capHeight };
 }
 
+const BOUND_PAD_X = 8, BOUND_PAD_Y = 4;
+
 function drawHighlight(obj) {
    if(!obj.highlightColor) return;
    const measure = measureText(obj.text, obj.capHeight);
    if(!measure) return;
-   const PAD_X = 8, PAD_Y = 4;
    ctx.fillStyle = obj.highlightColor;
    ctx.fillRect(
-      obj.x - PAD_X,
-      obj.y - PAD_Y,
-      measure.width + PAD_X * 2,
-      obj.capHeight * 1.25 + PAD_Y * 2,
+      obj.x - BOUND_PAD_X,
+      obj.y - BOUND_PAD_Y,
+      measure.width + BOUND_PAD_X * 2,
+      obj.capHeight * 1.25 + BOUND_PAD_Y * 2,
    );
 }
 
@@ -107,11 +108,9 @@ let dragState  = null;
 let rafPending = false;
 
 function createHandle(obj) {
-   const div       = document.createElement('div');
-   div.className   = 'handle';
-   div.dataset.id  = obj.id;
-   div.style.left  = obj.x + 'px';
-   div.style.top   = obj.y + 'px';
+   const div      = document.createElement('div');
+   div.className  = 'handle';
+   div.dataset.id = obj.id;
 
    div.addEventListener('mousedown', e => {
       e.stopPropagation();
@@ -128,17 +127,24 @@ function createHandle(obj) {
    });
 
    canvasContainer.appendChild(div);
+   syncBounds(obj);
    return div;
 }
 
+function syncBounds(obj) {
+   const h = canvasContainer.querySelector(`.handle[data-id="${obj.id}"]`);
+   if (!h) return;
+   const measure = measureText(obj.text, obj.capHeight);
+   const w  = (measure ? measure.width : 40) + BOUND_PAD_X * 2;
+   const ht = obj.capHeight * 1.25 + BOUND_PAD_Y * 2;
+   h.style.left   = (obj.x - BOUND_PAD_X) + 'px';
+   h.style.top    = (obj.y - BOUND_PAD_Y) + 'px';
+   h.style.width  = w + 'px';
+   h.style.height = ht + 'px';
+}
+
 function syncHandles() {
-   for (const obj of textObjects) {
-      const h = canvasContainer.querySelector(`.handle[data-id="${obj.id}"]`);
-      if (h) {
-         h.style.left = obj.x + 'px';
-         h.style.top  = obj.y + 'px';
-      }
-   }
+   for (const obj of textObjects) syncBounds(obj);
 }
 
 function updateHandleSelection() {
@@ -213,7 +219,9 @@ function redrawSelected() {
 
 textInput.addEventListener('input', () => {
    const obj = getSelectedObject();
-   if (obj) obj.text = textInput.value;
+   if (!obj) return;
+   obj.text = textInput.value;
+   syncBounds(obj);
 });
 
 thicknessSlider.addEventListener('input', () => {
@@ -229,6 +237,7 @@ capHtSlider.addEventListener('input', () => {
    if (!obj) return;
    obj.capHeight        = parseInt(capHtSlider.value);
    capHtVal.textContent = capHtSlider.value + 'px';
+   syncBounds(obj);
    redrawSelected();
 });
 
@@ -377,7 +386,7 @@ window.addEventListener('resize', () => {
 // ── Startup ───────────────────────────────────────────────────────────────
 fetch('./tim-hand.json')
    .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
-   .then(data => { glyphSet = data; })
+   .then(data => { glyphSet = data; for (const obj of textObjects) syncBounds(obj); })
    .catch(e => console.error('Failed to load tim-hand.json:', e));
 
 initCanvas();
