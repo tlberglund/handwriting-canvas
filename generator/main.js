@@ -32,6 +32,7 @@ function createTextObject() {
       y,
       capHeight:      80,
       speed:          1.5,
+      thickness:      2,
       color:          '#1a1a1a',
       highlightColor: null,
       pixelDensity:   2,
@@ -84,6 +85,8 @@ function instantDraw(obj) {
       capHeight: obj.capHeight,
       speed:     obj.speed,
       color:     obj.color,
+      minWidth:  obj.thickness,
+      maxWidth:  obj.thickness * 2,
       scale:     SCALE,
       instant:   true,
    });
@@ -166,6 +169,8 @@ const speedVal           = document.getElementById('speed-val');
 const colorPicker        = document.getElementById('color-picker');
 const pixelDensitySlider = document.getElementById('pixel-density-slider');
 const pixelDensityVal    = document.getElementById('pixel-density-val');
+const thicknessSlider    = document.getElementById('thickness-slider');
+const thicknessVal       = document.getElementById('thickness-val');
 const btnAnimate         = document.getElementById('btn-animate');
 const btnClear           = document.getElementById('btn-clear');
 const btnDelete          = document.getElementById('btn-delete');
@@ -190,6 +195,8 @@ function renderPanel(obj) {
    colorPicker.value           = obj.color;
    pixelDensitySlider.value    = obj.pixelDensity;
    pixelDensityVal.textContent = obj.pixelDensity;
+   thicknessSlider.value       = obj.thickness;
+   thicknessVal.textContent    = obj.thickness + 'px';
    highlightEnable.checked     = !!obj.highlightColor;
    highlightPicker.value       = obj.highlightColor || '#ffff66';
    highlightPicker.disabled    = !obj.highlightColor;
@@ -207,6 +214,14 @@ function redrawSelected() {
 textInput.addEventListener('input', () => {
    const obj = getSelectedObject();
    if (obj) obj.text = textInput.value;
+});
+
+thicknessSlider.addEventListener('input', () => {
+   const obj = getSelectedObject();
+   if (!obj) return;
+   obj.thickness            = parseFloat(thicknessSlider.value);
+   thicknessVal.textContent = obj.thickness + 'px';
+   redrawSelected();
 });
 
 capHtSlider.addEventListener('input', () => {
@@ -278,6 +293,8 @@ btnAnimate.addEventListener('click', async () => {
       capHeight: obj.capHeight,
       speed:     obj.speed,
       color:     obj.color,
+      minWidth:  obj.thickness,
+      maxWidth:  obj.thickness * 2,
       scale:     SCALE,
       sounds:    true,
    });
