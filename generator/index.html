@@ -37,8 +37,15 @@
             </div>
          </div>
          <div class="control-item">
-            <label for="color-picker">Color</label>
+            <label for="color-picker">Ink Color</label>
             <input type="color" id="color-picker" value="#1a1a1a">
+         </div>
+         <div class="control-item">
+            <label>Highlight</label>
+            <div class="value-row">
+               <input type="checkbox" id="highlight-enable">
+               <input type="color" id="highlight-picker" value="#ffff66">
+            </div>
          </div>
          <div class="control-item">
             <label for="pixel-density-slider">Pixel Density</label>
@@ -52,6 +59,12 @@
             <button id="btn-clear">Clear</button>
          </div>
          <button id="btn-delete">Delete Object</button>
+      </div>
+      <div class="panel-canvas">
+         <div class="control-item">
+            <label for="canvas-bg-picker">Canvas Background</label>
+            <input type="color" id="canvas-bg-picker" value="#ffffff">
+         </div>
       </div>
       <div class="panel-footer">
          <button id="btn-new">+ New Text</button>

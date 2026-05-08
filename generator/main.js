@@ -13,10 +13,11 @@ function initCanvas() {
 }
 
 // ── App state ─────────────────────────────────────────────────────────────
-let glyphSet    = null;
-let textObjects = [];
-let selectedId  = null;
-let isAnimating = false;
+let glyphSet        = null;
+let textObjects     = [];
+let selectedId      = null;
+let isAnimating     = false;
+let canvasBackground = '#ffffff';
 
 // ── Text object factory ───────────────────────────────────────────────────
 let nextId = 1;
@@ -25,22 +26,58 @@ function createTextObject() {
    const x = canvasContainer.clientWidth  / 2;
    const y = canvasContainer.clientHeight / 2;
    return {
-      id:           `text-${nextId++}`,
-      text:         'Hello',
+      id:             `text-${nextId++}`,
+      text:           'Hello',
       x,
       y,
-      capHeight:    80,
-      speed:        1.5,
-      color:        '#1a1a1a',
-      pixelDensity: 2,
-      state:        'idle',
-      animator:     glyphSet ? new HandwritingAnimator(canvas, glyphSet) : null,
+      capHeight:      80,
+      speed:          1.5,
+      color:          '#1a1a1a',
+      highlightColor: null,
+      pixelDensity:   2,
+      state:          'idle',
+      animator:       glyphSet ? new HandwritingAnimator(canvas, glyphSet) : null,
    };
 }
 
 // ── Canvas render ─────────────────────────────────────────────────────────
+function measureText(text, capHeight) {
+   if (!glyphSet || !text?.trim()) return null;
+   const LETTER_GAP = 0.05;
+   const WORD_GAP   = 0.35;
+   let xOffset  = 0;
+   let hasGlyph = false;
+   for (const char of text) {
+      if(char === ' ') {
+         xOffset += WORD_GAP;
+      } else {
+         const glyph = glyphSet.glyphs[char];
+         if(!glyph?.captures?.length) continue;
+         xOffset += glyph.captures[0].width + LETTER_GAP;
+         hasGlyph = true;
+      }
+   }
+   if(!hasGlyph) return null;
+   return { width: Math.max(0, xOffset - LETTER_GAP) * capHeight };
+}
+
+function drawHighlight(obj) {
+   if(!obj.highlightColor) return;
+   const measure = measureText(obj.text, obj.capHeight);
+   if(!measure) return;
+   const PAD_X = 8, PAD_Y = 4;
+   ctx.fillStyle = obj.highlightColor;
+   ctx.fillRect(
+      obj.x - PAD_X,
+      obj.y - PAD_Y,
+      measure.width + PAD_X * 2,
+      obj.capHeight * 1.25 + PAD_Y * 2,
+   );
+}
+
 function instantDraw(obj) {
    if (!obj.animator || !obj.text?.trim()) return;
+   drawHighlight(obj);
    obj.animator.write(obj.text, {
       x:         obj.x,
       y:         obj.y,
@@ -54,6 +91,8 @@ function instantDraw(obj) {
 
 function redrawAll(exceptId = null) {
    ctx.clearRect(0, 0, canvasContainer.clientWidth, canvasContainer.clientHeight);
+   ctx.fillStyle = canvasBackground;
+   ctx.fillRect(0, 0, canvasContainer.clientWidth, canvasContainer.clientHeight);
    for (const obj of textObjects) {
       if (obj.id === exceptId) continue;
       if (obj.state === 'done') instantDraw(obj);
@@ -130,6 +169,9 @@ const pixelDensityVal    = document.getElementById('pixel-density-val');
 const btnAnimate         = document.getElementById('btn-animate');
 const btnClear           = document.getElementById('btn-clear');
 const btnDelete          = document.getElementById('btn-delete');
+const highlightEnable    = document.getElementById('highlight-enable');
+const highlightPicker    = document.getElementById('highlight-picker');
+const canvasBgPicker     = document.getElementById('canvas-bg-picker');
 
 function renderPanel(obj) {
    if (!obj) {
@@ -140,15 +182,18 @@ function renderPanel(obj) {
    placeholder.style.display = 'none';
    controls.style.display    = 'flex';
 
-   textInput.value           = obj.text;
-   capHtSlider.value         = obj.capHeight;
-   capHtVal.textContent      = obj.capHeight + 'px';
-   speedSlider.value         = obj.speed;
-   speedVal.textContent      = obj.speed.toFixed(1) + '×';
-   colorPicker.value         = obj.color;
-   pixelDensitySlider.value  = obj.pixelDensity;
+   textInput.value             = obj.text;
+   capHtSlider.value           = obj.capHeight;
+   capHtVal.textContent        = obj.capHeight + 'px';
+   speedSlider.value           = obj.speed;
+   speedVal.textContent        = obj.speed.toFixed(1) + '×';
+   colorPicker.value           = obj.color;
+   pixelDensitySlider.value    = obj.pixelDensity;
    pixelDensityVal.textContent = obj.pixelDensity;
-   btnAnimate.disabled       = isAnimating;
+   highlightEnable.checked     = !!obj.highlightColor;
+   highlightPicker.value       = obj.highlightColor || '#ffff66';
+   highlightPicker.disabled    = !obj.highlightColor;
+   btnAnimate.disabled         = isAnimating;
 }
 
 // ── Control wiring ────────────────────────────────────────────────────────
@@ -194,6 +239,26 @@ pixelDensitySlider.addEventListener('input', () => {
    redrawSelected();
 });
 
+highlightEnable.addEventListener('change', () => {
+   const obj = getSelectedObject();
+   if (!obj) return;
+   obj.highlightColor       = highlightEnable.checked ? highlightPicker.value : null;
+   highlightPicker.disabled = !highlightEnable.checked;
+   redrawSelected();
+});
+
+highlightPicker.addEventListener('input', () => {
+   const obj = getSelectedObject();
+   if (!obj || !highlightEnable.checked) return;
+   obj.highlightColor = highlightPicker.value;
+   redrawSelected();
+});
+
+canvasBgPicker.addEventListener('input', () => {
+   canvasBackground = canvasBgPicker.value;
+   redrawAll();
+});
+
 // ── Animate ───────────────────────────────────────────────────────────────
 btnAnimate.addEventListener('click', async () => {
    const obj = getSelectedObject();
@@ -206,6 +271,7 @@ btnAnimate.addEventListener('click', async () => {
    obj.state         = 'animating';
 
    redrawAll(obj.id);
+   drawHighlight(obj);
    await obj.animator.write(obj.text, {
       x:         obj.x,
       y:         obj.y,
