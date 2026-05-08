@@ -6,7 +6,8 @@
       "Bash(openspec new *)",
       "Bash(openspec status *)",
       "Bash(openspec instructions *)",
-      "Bash(npm show *)"
+      "Bash(npm show *)",
+      "Bash(openspec list *)"
     ]
   }
 }

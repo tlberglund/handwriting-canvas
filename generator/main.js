@@ -129,6 +129,7 @@ const pixelDensitySlider = document.getElementById('pixel-density-slider');
 const pixelDensityVal    = document.getElementById('pixel-density-val');
 const btnAnimate         = document.getElementById('btn-animate');
 const btnClear           = document.getElementById('btn-clear');
+const btnDelete          = document.getElementById('btn-delete');
 
 function renderPanel(obj) {
    if (!obj) {
@@ -151,6 +152,13 @@ function renderPanel(obj) {
 }
 
 // ── Control wiring ────────────────────────────────────────────────────────
+function redrawSelected() {
+   const obj = getSelectedObject();
+   if (!obj || obj.state !== 'done') return;
+   redrawAll(obj.id);
+   instantDraw(obj);
+}
+
 textInput.addEventListener('input', () => {
    const obj = getSelectedObject();
    if (obj) obj.text = textInput.value;
@@ -161,6 +169,7 @@ capHtSlider.addEventListener('input', () => {
    if (!obj) return;
    obj.capHeight        = parseInt(capHtSlider.value);
    capHtVal.textContent = capHtSlider.value + 'px';
+   redrawSelected();
 });
 
 speedSlider.addEventListener('input', () => {
@@ -172,14 +181,17 @@ speedSlider.addEventListener('input', () => {
 
 colorPicker.addEventListener('input', () => {
    const obj = getSelectedObject();
-   if (obj) obj.color = colorPicker.value;
+   if (!obj) return;
+   obj.color = colorPicker.value;
+   redrawSelected();
 });
 
 pixelDensitySlider.addEventListener('input', () => {
    const obj = getSelectedObject();
    if (!obj) return;
-   obj.pixelDensity           = parseInt(pixelDensitySlider.value);
+   obj.pixelDensity            = parseInt(pixelDensitySlider.value);
    pixelDensityVal.textContent = pixelDensitySlider.value;
+   redrawSelected();
 });
 
 // ── Animate ───────────────────────────────────────────────────────────────
@@ -207,6 +219,17 @@ btnAnimate.addEventListener('click', async () => {
    obj.state         = 'done';
    isAnimating       = false;
    if (selectedId === obj.id) btnAnimate.disabled = false;
+});
+
+// ── Delete ────────────────────────────────────────────────────────────────
+btnDelete.addEventListener('click', () => {
+   const obj = getSelectedObject();
+   if (!obj) return;
+   textObjects = textObjects.filter(o => o.id !== obj.id);
+   canvasContainer.querySelector(`.handle[data-id="${obj.id}"]`)?.remove();
+   selectedId = null;
+   redrawAll();
+   renderPanel(null);
 });
 
 // ── Clear ─────────────────────────────────────────────────────────────────

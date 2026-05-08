@@ -2,7 +2,7 @@
 
 - [x] 1.1 Rewrite `index.html`: full-viewport shell, 16:9 stage container, single `<canvas>`, properties panel sidebar
 - [x] 1.2 Rewrite `styles.css`: dark shell background, centered 16:9 stage, white canvas, panel layout
-- [ ] 1.3 Verify canvas maintains 16:9 aspect ratio and fills stage on load
+- [x] 1.3 Verify canvas maintains 16:9 aspect ratio and fills stage on load
 
 ## 2. App State and Text Object Model
 
@@ -45,5 +45,5 @@
 
 - [x] 7.1 Load `tim-hand.json` on startup; store as `glyphSet`; pass to each `HandwritingAnimator` constructor when text objects are created
 - [x] 7.2 Apply selected-state CSS class to active handle on selection change
-- [ ] 7.3 Verify drag performance with 3+ done objects (instant redraw must feel real-time)
-- [ ] 7.4 Test full flow: New → type text → set params → Animate → drag → Animate second object
+- [x] 7.3 Verify drag performance with 3+ done objects (instant redraw must feel real-time)
+- [x] 7.4 Test full flow: New → type text → set params → Animate → drag → Animate second object
