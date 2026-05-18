@@ -1,0 +1,29 @@
+## ADDED Requirements
+
+### Requirement: Centralized Zustand store
+App state SHALL be managed by a single Zustand store exported from `src/store.ts`. The store SHALL be the sole source of truth for all data that affects rendering or UI. Components SHALL read state via Zustand selectors and mutate it only through store actions.
+
+#### Scenario: Store is accessible without a Provider
+- **WHEN** any component imports and calls `useStore`
+- **THEN** it receives current state without requiring a wrapping `<Provider>` component
+
+### Requirement: TextObject interface
+The store SHALL define and export a `TextObject` TypeScript interface with the following fields: `id` (string), `text` (string), `x` (number), `y` (number), `capHeight` (number), `speed` (number), `thickness` (number), `color` (string), `highlightColor` (string | null), `pixelDensity` (number), `state` ('idle' | 'animating' | 'done').
+
+#### Scenario: New object conforms to interface
+- **WHEN** the `addObject` action is called
+- **THEN** the created object satisfies the TextObject interface with all fields present and typed correctly
+
+### Requirement: Store holds serializable state only
+The Zustand store SHALL NOT hold class instances (e.g., `HandwritingAnimator`). Animator instances SHALL be managed in a ref map outside the store, keyed by object ID.
+
+#### Scenario: Store state is JSON-serializable
+- **WHEN** `JSON.stringify(useStore.getState())` is called (excluding functions)
+- **THEN** it produces valid JSON with no circular references or class instances
+
+### Requirement: Store actions
+The store SHALL expose the following actions: `addObject()`, `selectObject(id: string | null)`, `updateObject(id: string, patch: Partial<TextObject>)`, `deleteObject(id: string)`, `setGlyphSet(gs: GlyphSet)`, `setAnimating(flag: boolean)`, `setCanvasBackground(color: string)`.
+
+#### Scenario: updateObject patches without replacing
+- **WHEN** `updateObject` is called with a partial patch
+- **THEN** only the specified fields change and all other fields on the object are preserved

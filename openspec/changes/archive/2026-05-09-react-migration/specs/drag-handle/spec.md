@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Each text object has an HTML drag handle
 Each text object SHALL have an absolutely-positioned `<div>` (rendered as a React `<ObjectHandle>` component) overlaid on the stage. The handle SHALL be sized as a bounding box matching the rendered text extents, computed from `measureText`. The handle is the drag target; the canvas is not a hit target for drag events.

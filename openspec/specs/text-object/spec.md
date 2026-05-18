@@ -1,11 +1,11 @@
 ## ADDED Requirements
 
 ### Requirement: Text object data model
-Each text object SHALL have the following properties: `id` (unique string), `text` (string), `x` (number, CSS px from stage left), `y` (number, CSS px from stage top), `capHeight` (number, px), `speed` (number, multiplier), `color` (string, CSS color), `pixelDensity` (number, integer), and `state` (one of: `idle`, `animating`, `done`).
+Each text object SHALL have the following properties: `id` (unique string), `text` (string), `x` (number, CSS px from stage left), `y` (number, CSS px from stage top), `capHeight` (number, px), `speed` (number, multiplier), `thickness` (number, px — controls minWidth; maxWidth is derived as thickness * 2), `color` (string, CSS color), `highlightColor` (string | null — CSS color, or null for no highlight), `pixelDensity` (number, integer), and `state` (one of: `idle`, `animating`, `done`).
 
 #### Scenario: New text object has default values
 - **WHEN** a new text object is created
-- **THEN** it has default values: capHeight=80, speed=1.5, color=#1a1a1a, pixelDensity=2, state=idle, and is positioned at the center of the stage
+- **THEN** it has default values: capHeight=80, speed=1.5, thickness=2, color=#1a1a1a, highlightColor=null, pixelDensity=2, state=idle, and is positioned at the center of the stage
 
 ### Requirement: Text objects are created via New button
 The app SHALL provide a "New Text" button. Clicking it SHALL create a new text object, add it to the object list, and select it.

@@ -11,9 +11,12 @@ The stage SHALL occupy the full viewport with a 16:9 aspect ratio canvas centere
 - **WHEN** the viewport is resized
 - **THEN** the canvas maintains a 16:9 aspect ratio, letterboxed within the stage if necessary
 
-#### Scenario: Canvas is white
-- **WHEN** the page loads
-- **THEN** the canvas background is white, representing the output surface
+### Requirement: Canvas background color is configurable
+The canvas background color SHALL be configurable via the store's `canvasBackground` value. The default SHALL be `#ffffff` (white). The background is rendered as a filled rectangle in `redrawAll`, not as a CSS property on the canvas container.
+
+#### Scenario: Canvas background reflects store value
+- **WHEN** `canvasBackground` in the store is changed to `#000000`
+- **THEN** the next `redrawAll` call fills the canvas with black before drawing text objects
 
 ### Requirement: Stage is the shared ink surface
 The canvas SHALL be shared by all text objects. Text objects SHALL NOT each own a separate canvas element.
