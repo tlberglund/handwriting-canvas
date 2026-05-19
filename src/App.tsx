@@ -5,6 +5,7 @@ import { useStore } from './store'
 import EngineContext from './context'
 import Stage from './components/Stage'
 import PropertiesPanel from './components/PropertiesPanel'
+import ObjectsPanel from './components/ObjectsPanel'
 import { redrawAll } from './engine'
 
 export default function App() {
@@ -37,6 +38,7 @@ export default function App() {
 
   return (
     <EngineContext.Provider value={{ canvasRef, animatorMapRef, containerRef }}>
+      <ObjectsPanel />
       <Stage />
       <PropertiesPanel />
     </EngineContext.Provider>

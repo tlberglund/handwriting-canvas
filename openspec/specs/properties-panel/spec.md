@@ -64,10 +64,3 @@ The properties panel SHALL contain Animate and Clear buttons that operate on the
 #### Scenario: Clear button clears selected object
 - **WHEN** the user clicks Clear with an object selected
 - **THEN** the selected object's ink is cleared per the text-object clear requirement
-
-### Requirement: New Text button is in the properties panel
-The properties panel SHALL contain a "New Text" button that creates and selects a new text object.
-
-#### Scenario: New Text button creates object
-- **WHEN** the user clicks "New Text"
-- **THEN** a new text object is created with defaults, added to the stage, selected, and the properties panel populates with its default values
