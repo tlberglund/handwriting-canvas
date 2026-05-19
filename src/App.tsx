@@ -5,6 +5,7 @@ import { useStore } from './store'
 import EngineContext from './context'
 import Stage from './components/Stage'
 import PropertiesPanel from './components/PropertiesPanel'
+import { redrawAll } from './engine'
 
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -18,7 +19,18 @@ export default function App() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         return res.json() as Promise<GlyphSet>
       })
-      .then(data => setGlyphSet(data))
+      .then(data => {
+        setGlyphSet(data)
+        const canvas = canvasRef.current
+        if (!canvas) return
+        const { textObjects, canvasBackground } = useStore.getState()
+        for (const obj of textObjects) {
+          if (obj.state === 'done' && !animatorMapRef.current.has(obj.id)) {
+            animatorMapRef.current.set(obj.id, new HandwritingAnimator(canvas, data))
+          }
+        }
+        redrawAll(canvas, textObjects, canvasBackground, animatorMapRef.current, data)
+      })
       .catch(e => console.error('Failed to load tim-hand.json:', e))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

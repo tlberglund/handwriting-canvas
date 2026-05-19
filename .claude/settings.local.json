@@ -10,7 +10,8 @@
       "Bash(openspec list *)",
       "Bash(npm run *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5174/)",
-      "Bash(kill %1)"
+      "Bash(kill %1)",
+      "Bash(npx tsc *)"
     ]
   }
 }
