@@ -1,10 +1,10 @@
 import { createContext, useContext } from 'react'
 import type { RefObject, MutableRefObject } from 'react'
-import type { HandwritingAnimator } from '@tlberglund/handwriting-playback'
+import type { AnimatorEntry } from './engine'
 
 export interface EngineContextValue {
   canvasRef: RefObject<HTMLCanvasElement | null>
-  animatorMapRef: MutableRefObject<Map<string, HandwritingAnimator>>
+  animatorMapRef: MutableRefObject<Map<string, AnimatorEntry>>
   containerRef: RefObject<HTMLDivElement | null>
 }
 

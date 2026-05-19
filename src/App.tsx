@@ -7,11 +7,12 @@ import Stage from './components/Stage'
 import PropertiesPanel from './components/PropertiesPanel'
 import ObjectsPanel from './components/ObjectsPanel'
 import { redrawAll } from './engine'
+import type { AnimatorEntry } from './engine'
 
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const animatorMapRef = useRef<Map<string, HandwritingAnimator>>(new Map())
+  const animatorMapRef = useRef<Map<string, AnimatorEntry>>(new Map())
   const setGlyphSet = useStore(s => s.setGlyphSet)
 
   useEffect(() => {
@@ -27,7 +28,12 @@ export default function App() {
         const { textObjects, canvasBackground } = useStore.getState()
         for (const obj of textObjects) {
           if (obj.state === 'done' && !animatorMapRef.current.has(obj.id)) {
-            animatorMapRef.current.set(obj.id, new HandwritingAnimator(canvas, data))
+            const entry: AnimatorEntry = {
+              animator: new HandwritingAnimator(canvas, data),
+              layout: null,
+              layoutText: null,
+            }
+            animatorMapRef.current.set(obj.id, entry)
           }
         }
         redrawAll(canvas, textObjects, canvasBackground, animatorMapRef.current, data)

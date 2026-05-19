@@ -16,7 +16,11 @@ export default function ObjectsPanel() {
     const id = addObject(container.clientWidth, container.clientHeight)
     const { glyphSet } = useStore.getState()
     if (canvas && glyphSet) {
-      animatorMapRef.current.set(id, new HandwritingAnimator(canvas, glyphSet))
+      animatorMapRef.current.set(id, {
+        animator: new HandwritingAnimator(canvas, glyphSet),
+        layout: null,
+        layoutText: null,
+      })
     }
   }
 

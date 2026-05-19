@@ -2,6 +2,7 @@ import { HandwritingAnimator } from '@tlberglund/handwriting-playback'
 import { useStore, type TextObject } from '../store'
 import { useEngine } from '../context'
 import { redrawAll, instantDraw, drawHighlight, SCALE } from '../engine'
+import type { AnimatorEntry } from '../engine'
 
 interface Props {
   obj: TextObject
@@ -14,7 +15,6 @@ export default function PanelControls({ obj }: Props) {
   const isAnimating = useStore(s => s.isAnimating)
   const setAnimating = useStore(s => s.setAnimating)
 
-  // Reads state in callbacks — uses getState() per rerender-defer-reads
   const redrawSelected = () => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -31,10 +31,14 @@ export default function PanelControls({ obj }: Props) {
     const { glyphSet } = useStore.getState()
     if (!glyphSet) return
 
-    let animator = animatorMapRef.current.get(obj.id)
-    if (!animator) {
-      animator = new HandwritingAnimator(canvas, glyphSet)
-      animatorMapRef.current.set(obj.id, animator)
+    let entry = animatorMapRef.current.get(obj.id)
+    if (!entry) {
+      entry = {
+        animator: new HandwritingAnimator(canvas, glyphSet),
+        layout: null,
+        layoutText: null,
+      } satisfies AnimatorEntry
+      animatorMapRef.current.set(obj.id, entry)
     }
 
     setAnimating(true)
@@ -44,7 +48,7 @@ export default function PanelControls({ obj }: Props) {
     redrawAll(canvas, textObjects, canvasBackground, animatorMapRef.current, glyphSet, obj.id)
     drawHighlight(canvas, obj, glyphSet)
 
-    await animator.write(obj.text, {
+    await entry.animator.write(obj.text, {
       x: obj.x,
       y: obj.y,
       capHeight: obj.capHeight,
@@ -56,6 +60,10 @@ export default function PanelControls({ obj }: Props) {
       sounds: true,
     })
 
+    // Cache layout so subsequent instant redraws reuse the same captures
+    entry.layout = null
+    entry.layoutText = null
+
     updateObject(obj.id, { state: 'done' })
     setAnimating(false)
   }
@@ -64,6 +72,9 @@ export default function PanelControls({ obj }: Props) {
     const canvas = canvasRef.current
     if (!canvas) return
     updateObject(obj.id, { state: 'idle' })
+    // Invalidate cached layout so next animation gets fresh captures
+    const entry = animatorMapRef.current.get(obj.id)
+    if (entry) { entry.layout = null; entry.layoutText = null }
     const { textObjects, canvasBackground, glyphSet } = useStore.getState()
     redrawAll(canvas, textObjects, canvasBackground, animatorMapRef.current, glyphSet, obj.id)
   }
