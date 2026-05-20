@@ -12,6 +12,7 @@ import type { AnimatorEntry } from './engine'
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const stageRef = useRef<HTMLDivElement | null>(null)
   const animatorMapRef = useRef<Map<string, AnimatorEntry>>(new Map())
   const setGlyphSet = useStore(s => s.setGlyphSet)
 
@@ -43,7 +44,7 @@ export default function App() {
   }, [])
 
   return (
-    <EngineContext.Provider value={{ canvasRef, animatorMapRef, containerRef }}>
+    <EngineContext.Provider value={{ canvasRef, animatorMapRef, containerRef, stageRef }}>
       <ObjectsPanel />
       <Stage />
       <PropertiesPanel />

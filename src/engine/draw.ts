@@ -6,11 +6,11 @@ export const SCALE = 2
 
 // New in 0.3.2 — declared locally so code compiles against 0.3.1.
 // Remove this block once the package is updated.
-interface HandwritingLayout {
+export interface HandwritingLayout {
   readonly sequence: unknown[]
   readonly width: number
 }
-interface AnimatorV2 {
+export interface AnimatorV2 {
   prepare(text: string): HandwritingLayout
   write(layout: HandwritingLayout, opts: Record<string, unknown>): Promise<void>
 }
@@ -21,11 +21,18 @@ export interface AnimatorEntry {
   layoutText: string | null
 }
 
-export function initCanvas(canvas: HTMLCanvasElement, container: HTMLDivElement): void {
-  canvas.width = container.clientWidth * SCALE
-  canvas.height = container.clientHeight * SCALE
+export function initCanvas(
+  canvas: HTMLCanvasElement,
+  container: HTMLDivElement,
+  logicalWidth = container.clientWidth,
+  logicalHeight = container.clientHeight,
+): void {
+  const physW = container.clientWidth * SCALE
+  const physH = container.clientHeight * SCALE
+  canvas.width = physW
+  canvas.height = physH
   const ctx = canvas.getContext('2d')!
-  ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0)
+  ctx.setTransform(physW / logicalWidth, 0, 0, physH / logicalHeight, 0, 0)
 }
 
 export function drawHighlight(

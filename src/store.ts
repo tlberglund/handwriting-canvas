@@ -21,6 +21,7 @@ interface AppState {
   selectedId: string | null
   canvasBackground: string
   isAnimating: boolean
+  isPresentationMode: boolean
   glyphSet: GlyphSet | null
   addObject: (stageWidth: number, stageHeight: number) => string
   selectObject: (id: string | null) => void
@@ -28,6 +29,7 @@ interface AppState {
   deleteObject: (id: string) => void
   setGlyphSet: (gs: GlyphSet) => void
   setAnimating: (flag: boolean) => void
+  setPresentationMode: (flag: boolean) => void
   setCanvasBackground: (color: string) => void
 }
 
@@ -38,6 +40,7 @@ export const useStore = create<AppState>()(
       selectedId: null,
       canvasBackground: '#ffffff',
       isAnimating: false,
+      isPresentationMode: false,
       glyphSet: null,
 
       addObject: (stageWidth, stageHeight) => {
@@ -74,6 +77,7 @@ export const useStore = create<AppState>()(
 
       setGlyphSet: (gs) => set({ glyphSet: gs }),
       setAnimating: (flag) => set({ isAnimating: flag }),
+      setPresentationMode: (flag) => set({ isPresentationMode: flag }),
       setCanvasBackground: (color) => set({ canvasBackground: color }),
     }),
     {

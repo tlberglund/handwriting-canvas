@@ -2,7 +2,7 @@ import { HandwritingAnimator } from '@tlberglund/handwriting-playback'
 import { useStore, type TextObject } from '../store'
 import { useEngine } from '../context'
 import { redrawAll, instantDraw, drawHighlight, SCALE } from '../engine'
-import type { AnimatorEntry } from '../engine'
+import type { AnimatorEntry, AnimatorV2 } from '../engine'
 
 interface Props {
   obj: TextObject
@@ -11,8 +11,8 @@ interface Props {
 export default function PanelControls({ obj }: Props) {
   const { canvasRef, animatorMapRef } = useEngine()
   const updateObject = useStore(s => s.updateObject)
-  const deleteObject = useStore(s => s.deleteObject)
   const isAnimating = useStore(s => s.isAnimating)
+  const isPresentationMode = useStore(s => s.isPresentationMode)
   const setAnimating = useStore(s => s.setAnimating)
 
   const redrawSelected = () => {
@@ -48,21 +48,38 @@ export default function PanelControls({ obj }: Props) {
     redrawAll(canvas, textObjects, canvasBackground, animatorMapRef.current, glyphSet, obj.id)
     drawHighlight(canvas, obj, glyphSet)
 
-    await entry.animator.write(obj.text, {
-      x: obj.x,
-      y: obj.y,
-      capHeight: obj.capHeight,
-      speed: obj.speed,
-      color: obj.color,
-      minWidth: obj.thickness,
-      maxWidth: obj.thickness * 2,
-      scale: SCALE,
-      sounds: true,
-    })
-
-    // Cache layout so subsequent instant redraws reuse the same captures
-    entry.layout = null
-    entry.layoutText = null
+    const v2 = entry.animator as unknown as AnimatorV2
+    if (typeof v2.prepare === 'function') {
+      if (!entry.layout || entry.layoutText !== obj.text) {
+        entry.layout = v2.prepare(obj.text)
+        entry.layoutText = obj.text
+      }
+      await v2.write(entry.layout, {
+        x: obj.x,
+        y: obj.y,
+        capHeight: obj.capHeight,
+        speed: obj.speed,
+        color: obj.color,
+        minWidth: obj.thickness,
+        maxWidth: obj.thickness * 2,
+        scale: SCALE,
+        sounds: true,
+      })
+    } else {
+      await entry.animator.write(obj.text, {
+        x: obj.x,
+        y: obj.y,
+        capHeight: obj.capHeight,
+        speed: obj.speed,
+        color: obj.color,
+        minWidth: obj.thickness,
+        maxWidth: obj.thickness * 2,
+        scale: SCALE,
+        sounds: true,
+      })
+      entry.layout = null
+      entry.layoutText = null
+    }
 
     updateObject(obj.id, { state: 'done' })
     setAnimating(false)
@@ -77,15 +94,6 @@ export default function PanelControls({ obj }: Props) {
     if (entry) { entry.layout = null; entry.layoutText = null }
     const { textObjects, canvasBackground, glyphSet } = useStore.getState()
     redrawAll(canvas, textObjects, canvasBackground, animatorMapRef.current, glyphSet, obj.id)
-  }
-
-  const handleDelete = () => {
-    deleteObject(obj.id)
-    animatorMapRef.current.delete(obj.id)
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const { textObjects, canvasBackground, glyphSet } = useStore.getState()
-    redrawAll(canvas, textObjects, canvasBackground, animatorMapRef.current, glyphSet)
   }
 
   return (
@@ -195,13 +203,12 @@ export default function PanelControls({ obj }: Props) {
       </div>
 
       <div className="action-row">
-        <button id="btn-animate" onClick={handleAnimate} disabled={isAnimating}>
+        <button id="btn-animate" onClick={handleAnimate} disabled={isAnimating || isPresentationMode}>
           Animate
         </button>
         <button id="btn-clear" onClick={handleClear}>Clear</button>
       </div>
 
-      <button id="btn-delete" onClick={handleDelete}>Delete Object</button>
     </div>
   )
 }

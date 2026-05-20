@@ -5,12 +5,13 @@ import { initCanvas, redrawAll } from '../engine'
 import ObjectHandle from './ObjectHandle'
 
 export default function Stage() {
-  const { canvasRef, containerRef, animatorMapRef } = useEngine()
+  const { canvasRef, containerRef, animatorMapRef, stageRef } = useEngine()
   const textObjects = useStore(s => s.textObjects)
   const selectObject = useStore(s => s.selectObject)
 
   useEffect(() => {
     const handleResize = () => {
+      if (useStore.getState().isPresentationMode) return
       const canvas = canvasRef.current
       const container = containerRef.current
       if (!canvas || !container) return
@@ -31,7 +32,7 @@ export default function Stage() {
   }
 
   return (
-    <div id="stage">
+    <div id="stage" ref={stageRef}>
       <div id="canvas-container" ref={containerRef} onClick={handleClick}>
         <canvas ref={canvasRef} id="output-canvas" />
         {textObjects.map(obj => (

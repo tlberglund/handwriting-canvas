@@ -6,6 +6,7 @@ export interface EngineContextValue {
   canvasRef: RefObject<HTMLCanvasElement | null>
   animatorMapRef: MutableRefObject<Map<string, AnimatorEntry>>
   containerRef: RefObject<HTMLDivElement | null>
+  stageRef: RefObject<HTMLDivElement | null>
 }
 
 const EngineContext = createContext<EngineContextValue | null>(null)
