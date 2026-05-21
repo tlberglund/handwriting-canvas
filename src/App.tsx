@@ -6,7 +6,8 @@ import EngineContext from './context'
 import Stage from './components/Stage'
 import PropertiesPanel from './components/PropertiesPanel'
 import ObjectsPanel from './components/ObjectsPanel'
-import { redrawAll } from './engine'
+import TabBar from './components/TabBar'
+import { redrawAll, initCanvas } from './engine'
 import type { AnimatorEntry } from './engine'
 
 export default function App() {
@@ -15,6 +16,9 @@ export default function App() {
   const stageRef = useRef<HTMLDivElement | null>(null)
   const animatorMapRef = useRef<Map<string, AnimatorEntry>>(new Map())
   const setGlyphSet = useStore(s => s.setGlyphSet)
+  const openProjectIds = useStore(s => s.openProjectIds)
+  const activeProjectId = useStore(s => s.activeProjectId)
+  const createProject = useStore(s => s.createProject)
 
   useEffect(() => {
     fetch('./tim-hand.json')
@@ -25,16 +29,16 @@ export default function App() {
       .then(data => {
         setGlyphSet(data)
         const canvas = canvasRef.current
-        if (!canvas) return
+        const container = containerRef.current
+        if (!canvas || !container) return
         const { textObjects, canvasBackground } = useStore.getState()
         for (const obj of textObjects) {
           if (obj.state === 'done' && !animatorMapRef.current.has(obj.id)) {
-            const entry: AnimatorEntry = {
+            animatorMapRef.current.set(obj.id, {
               animator: new HandwritingAnimator(canvas, data),
               layout: null,
               layoutText: null,
-            }
-            animatorMapRef.current.set(obj.id, entry)
+            })
           }
         }
         redrawAll(canvas, textObjects, canvasBackground, animatorMapRef.current, data)
@@ -43,11 +47,45 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Re-bootstrap canvas when active project changes
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const container = containerRef.current
+    if (!canvas || !container) return
+    const { textObjects, canvasBackground, glyphSet } = useStore.getState()
+    animatorMapRef.current.clear()
+    initCanvas(canvas, container)
+    if (glyphSet) {
+      for (const obj of textObjects) {
+        if (obj.state === 'done') {
+          animatorMapRef.current.set(obj.id, {
+            animator: new HandwritingAnimator(canvas, glyphSet),
+            layout: null,
+            layoutText: null,
+          })
+        }
+      }
+      redrawAll(canvas, textObjects, canvasBackground, animatorMapRef.current, glyphSet)
+    }
+  }, [activeProjectId])
+
+  const hasActiveProject = activeProjectId !== null && openProjectIds.length > 0
+
   return (
     <EngineContext.Provider value={{ canvasRef, animatorMapRef, containerRef, stageRef }}>
-      <ObjectsPanel />
-      <Stage />
-      <PropertiesPanel />
+      <TabBar />
+      {hasActiveProject ? (
+        <div id="main-row">
+          <ObjectsPanel />
+          <Stage />
+          <PropertiesPanel />
+        </div>
+      ) : (
+        <div id="empty-state">
+          <span>No projects open.</span>
+          <button onClick={() => createProject('Untitled Project')}>+ New Project</button>
+        </div>
+      )}
     </EngineContext.Provider>
   )
 }

@@ -44,45 +44,51 @@ export default function PanelControls({ obj }: Props) {
     setAnimating(true)
     updateObject(obj.id, { state: 'animating' })
 
-    const { textObjects, canvasBackground } = useStore.getState()
-    redrawAll(canvas, textObjects, canvasBackground, animatorMapRef.current, glyphSet, obj.id)
-    drawHighlight(canvas, obj, glyphSet)
+    try {
+      const { textObjects, canvasBackground } = useStore.getState()
+      redrawAll(canvas, textObjects, canvasBackground, animatorMapRef.current, glyphSet, obj.id)
+      drawHighlight(canvas, obj, glyphSet)
 
-    const v2 = entry.animator as unknown as AnimatorV2
-    if (typeof v2.prepare === 'function') {
-      if (!entry.layout || entry.layoutText !== obj.text) {
-        entry.layout = v2.prepare(obj.text)
-        entry.layoutText = obj.text
+      const v2 = entry.animator as unknown as AnimatorV2
+      if (typeof v2.prepare === 'function') {
+        if (!entry.layout || entry.layoutText !== obj.text) {
+          entry.layout = v2.prepare(obj.text)
+          entry.layoutText = obj.text
+        }
+        await v2.write(entry.layout, {
+          x: obj.x,
+          y: obj.y,
+          capHeight: obj.capHeight,
+          speed: obj.speed,
+          color: obj.color,
+          minWidth: obj.thickness,
+          maxWidth: obj.thickness * 2,
+          scale: SCALE,
+          sounds: true,
+        })
+      } else {
+        await entry.animator.write(obj.text, {
+          x: obj.x,
+          y: obj.y,
+          capHeight: obj.capHeight,
+          speed: obj.speed,
+          color: obj.color,
+          minWidth: obj.thickness,
+          maxWidth: obj.thickness * 2,
+          scale: SCALE,
+          sounds: true,
+        })
+        entry.layout = null
+        entry.layoutText = null
       }
-      await v2.write(entry.layout, {
-        x: obj.x,
-        y: obj.y,
-        capHeight: obj.capHeight,
-        speed: obj.speed,
-        color: obj.color,
-        minWidth: obj.thickness,
-        maxWidth: obj.thickness * 2,
-        scale: SCALE,
-        sounds: true,
-      })
-    } else {
-      await entry.animator.write(obj.text, {
-        x: obj.x,
-        y: obj.y,
-        capHeight: obj.capHeight,
-        speed: obj.speed,
-        color: obj.color,
-        minWidth: obj.thickness,
-        maxWidth: obj.thickness * 2,
-        scale: SCALE,
-        sounds: true,
-      })
-      entry.layout = null
-      entry.layoutText = null
-    }
 
-    updateObject(obj.id, { state: 'done' })
-    setAnimating(false)
+      updateObject(obj.id, { state: 'done' })
+    } catch (err) {
+      console.error('Animation failed:', err)
+      updateObject(obj.id, { state: 'idle' })
+    } finally {
+      setAnimating(false)
+    }
   }
 
   const handleClear = () => {
