@@ -6,6 +6,7 @@ import EngineContext from './context'
 import Stage from './components/Stage'
 import PropertiesPanel from './components/PropertiesPanel'
 import ObjectsPanel from './components/ObjectsPanel'
+import MenuBar from './components/MenuBar'
 import TabBar from './components/TabBar'
 import { redrawAll, initCanvas } from './engine'
 import type { AnimatorEntry } from './engine'
@@ -73,6 +74,7 @@ export default function App() {
 
   return (
     <EngineContext.Provider value={{ canvasRef, animatorMapRef, containerRef, stageRef }}>
+      <MenuBar />
       <TabBar />
       {hasActiveProject ? (
         <div id="main-row">
